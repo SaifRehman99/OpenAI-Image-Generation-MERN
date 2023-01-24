@@ -1,6 +1,5 @@
 import {samplePrompts} from "./sample";
-
-
+import FileSaver from 'file-saver';
 
 export const returnRandom = (prompt:string) : string => {
 
@@ -14,5 +13,11 @@ export const returnRandom = (prompt:string) : string => {
     if(prompt ===  randomPromptRes) return returnRandom(prompt);
 
     return randomPromptRes;
+
+}
+
+
+export const downloadImage = (id:string | number, photo:string) => {
+    FileSaver.saveAs(photo, `download_${id}.jpg`)
 
 }

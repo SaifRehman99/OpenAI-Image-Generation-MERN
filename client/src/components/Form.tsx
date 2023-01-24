@@ -6,6 +6,7 @@ import { Button } from '@mui/material';
 import Loader from "./Loader";
 import LoadingButton from '@mui/lab/LoadingButton';
 import { returnRandom } from '../helpers/uils';
+import axios from 'axios';
 
 
 const Form = () => {
@@ -40,16 +41,34 @@ const Form = () => {
     }
 
 
-    const generateImage = () => { 
+    const generateImage = async() => { 
         if(prompt){
+
+            try {
+                setGeneratingImg(true)
+                const {data} = await axios.post("http://localhost:8080/api/v1/dalle", {prompt})
+                setForm({...form, photo: `data:image/jpeg;base64,${data?.photo}`})
+                setGeneratingImg(false)
+            } catch (error) {
+                alert('Something went wrong....')
+                setGeneratingImg(false)
+            }
 
         }
     }
 
 
-    const submitHandler = () => {
+    const submitHandler = async() => {
         if(name && prompt && photo){
-
+            try {
+                setLoading(true)
+                const {data} = await axios.post("http://localhost:8080/api/v1/posts", {prompt, name, photo})
+                navigate("/")
+                setLoading(false)
+            } catch (error) {
+                alert('Something went wrong....')
+                setLoading(false)
+            }
         }
     }
 
@@ -68,11 +87,11 @@ const Form = () => {
                 <TextField fullWidth label="Prompt" name="prompt" id="fullWidth" sx={{ margin: 3 }} onChange={(e) => handleChange(e)} value={prompt}/>
 
 
-                {loading && <Loader/>}
+                {loading || generatingImg && <Loader/>}
 
 
 
-                <img src={photo ? photo : '/preview.png'} alt="image-" />
+                <img className='img' src={photo ? photo : '/preview.png'} alt="image-" />
 
                 <Button variant="contained" color="success" onClick={() => generateImage()} disabled={generatingImg}>{generatingImg ? "Generating......." :  "Generate Image"}</Button>
 
@@ -84,7 +103,7 @@ const Form = () => {
             <br/>
 
             
-            <LoadingButton loading={loading} style={{width:'50%'}} variant="contained" onClick={() => submitHandler()}>{loading ? "Sharing......." :  "Share It"}</LoadingButton>
+            <LoadingButton loading={loading} disabled={generatingImg} style={{width:'50%'}} variant="contained" onClick={() => submitHandler()}>{loading ? "Sharing......." :  "Share It"}</LoadingButton>
 
 
         </>
